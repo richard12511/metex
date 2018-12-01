@@ -1,10 +1,17 @@
 defmodule Metex.Worker do
 
   def temperature_of(location) do
-    result = url_for(location) |> HTTPoison.get |> parse_response
+    result = location |> url_for |> HTTPoison.get |> parse_response
     case result do
       {:ok, temp} -> "#{location}: #{temp}°C"
       :error -> "#{location} not found"
+    end
+  end
+
+  def loop do
+    receive do
+      {sender_pid, location} -> send(sender_pid, {:ok, temperature_of(location)})
+      _ -> IO.puts("Unknown message")
     end
   end
 
@@ -31,7 +38,7 @@ defmodule Metex.Worker do
   end
 
   defp apikey do
-    "APIKEY-GOES-HERE"
+    "a5d3c9e341baf8446f77dd9bef74d825"
   end
 
 end
